@@ -1,0 +1,38 @@
+api# Gateway: port 8080, custom HttpClient with truststore + client cert for backend HTTPS (mTLS to user-service)
+server:
+  port: 8080
+
+ssl:
+  enabled: true
+  certs:
+    path: ${CERTS_PATH:certs}
+  keystore:
+    password: ${SSL_KEYSTORE_PASSWORD:changeit}
+  truststore:
+    password: ${SSL_TRUSTSTORE_PASSWORD:changeit}
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

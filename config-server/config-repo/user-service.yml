@@ -1,0 +1,41 @@
+# user-service: HTTPS + mTLS, H2, Eureka secure
+server:
+  port: 0
+  ssl:
+    enabled: true
+    key-store: ${CERTS_PATH:certs}/user-server.p12
+    key-store-password: ${SSL_KEYSTORE_PASSWORD:changeit}
+    key-store-type: PKCS12
+    trust-store: ${CERTS_PATH:certs}/truststore.p12
+    trust-store-password: ${SSL_TRUSTSTORE_PASSWORD:changeit}
+    client-auth: need
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+    securePortEnabled: true
+    nonSecurePortEnabled: false
